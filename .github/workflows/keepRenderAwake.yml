@@ -1,0 +1,15 @@
+name: Keep Render Awake
+on:
+  push:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render App
+        run: curl -s https://e-learning-platform-5t3x.onrender.com
+
+

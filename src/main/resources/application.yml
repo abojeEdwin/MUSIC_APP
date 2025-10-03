@@ -1,5 +1,6 @@
 spring:
   security:
+    require-ssl: false
     oauth2:
       client:
         registration:
@@ -16,6 +17,10 @@ spring:
             user-info-uri: https://api.spotify.com/v1/me
             user-name-attribute: id
 
+app:
+  frontend:
+    url: http://localhost:3000
+
 server:
   port: 8080
-  forward-headers-strategy: native
+  forward-headers-strategy: framework

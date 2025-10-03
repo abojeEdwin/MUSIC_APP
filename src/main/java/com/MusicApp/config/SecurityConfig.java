@@ -25,6 +25,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .requiresChannel(channel -> channel.anyRequest().requiresSecure())
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/", "/error", "/webjars/**", "/favicon.ico").permitAll()
                         .anyRequest().authenticated()
@@ -43,6 +44,7 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "https://music-app-oab8.onrender.com"
         ));
+
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

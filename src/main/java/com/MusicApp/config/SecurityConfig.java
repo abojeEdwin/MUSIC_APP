@@ -55,5 +55,8 @@ public class SecurityConfig {
         return source;
     }
 
-
+    @Bean
+    public ForwardedHeaderFilter forwardedHeaderFilter() {
+        return new ForwardedHeaderFilter();
+    }
 }

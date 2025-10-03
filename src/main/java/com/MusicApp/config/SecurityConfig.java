@@ -25,6 +25,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/", "/error", "/webjars/**", "/favicon.ico").permitAll()
                         .anyRequest().authenticated()
@@ -32,8 +34,7 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(successHandler)
                         .failureUrl("http://localhost:3000?error=true")
-                )
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
+                );
         return http.build();
     }
 

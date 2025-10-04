@@ -1,89 +1,107 @@
 package com.MusicApp.controller;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.apache.hc.core5.http.ParseException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.function.client.WebClient;
+import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
+import se.michaelthelin.spotify.model_objects.miscellaneous.AudioAnalysis;
+import se.michaelthelin.spotify.model_objects.specification.*;
+import se.michaelthelin.spotify.requests.data.personalization.simplified.GetUsersTopArtistsRequest;
+import se.michaelthelin.spotify.requests.data.personalization.simplified.GetUsersTopTracksRequest;
+import se.michaelthelin.spotify.requests.data.tracks.GetAudioAnalysisForTrackRequest;
+import se.michaelthelin.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
+
+import java.io.IOException;
+
+import static com.MusicApp.controller.AuthController.spotifyApi;
 
 
 @RestController
-@RequestMapping("/spotify")
+@RequestMapping("/api")
 public class SportifyController {
 
-    private final WebClient webClient = WebClient.create("https://api.spotify.com/v1");
+    @GetMapping(value = "user-top-artists")
+    public Artist[] getUserTopArtists() {
 
-    @GetMapping("/me")
-    public ResponseEntity<String> getCurrentUser(
-            @RegisteredOAuth2AuthorizedClient("spotify") OAuth2AuthorizedClient authorizedClient,
-            @AuthenticationPrincipal OAuth2User oauthUser) {
+        final GetUsersTopArtistsRequest getUsersTopArtistsRequest = spotifyApi.getUsersTopArtists()
+                .time_range("medium_term")
+                .limit(10)
+                .offset(5)
+                .build();
 
-        String token = authorizedClient.getAccessToken().getTokenValue();
-        String response = webClient.get()
-                .uri("/me")
-                .header("Authorization", "Bearer " + token)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+        try {
+            final Paging<Artist> artistPaging = getUsersTopArtistsRequest.execute();
 
-        return ResponseEntity.ok(response);
+            // return top artists as JSON
+            return artistPaging.getItems();
+        } catch (Exception e) {
+            System.out.println("Something went wrong!\n" + e.getMessage());
+        }
+        return new Artist[0];
     }
 
+    @GetMapping(value = "user-top-songs")
+    public Track[] getUserTopTracks() {
 
-    @GetMapping("/search")
-    public ResponseEntity<String> search(
-            @RegisteredOAuth2AuthorizedClient("spotify") OAuth2AuthorizedClient authorizedClient,
-            @RequestParam String query,
-            @RequestParam(defaultValue = "track") String type) {
+        final GetUsersTopTracksRequest getUsersTopTracksRequest = spotifyApi.getUsersTopTracks()
+                .time_range("medium_term")
+                .limit(10)
+                .offset(5)
+                .build();
 
-        String token = authorizedClient.getAccessToken().getTokenValue();
-        String response = webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/search")
-                        .queryParam("q", query)
-                        .queryParam("type", type)
-                        .build())
-                .header("Authorization", "Bearer " + token)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+        try {
 
-        return ResponseEntity.ok(response);
+            final Paging<Track> trackPaging = getUsersTopTracksRequest.execute();
+
+            // return top Tracks as JSON
+            return trackPaging.getItems();
+        } catch (Exception e) {
+            System.out.println("Something went wrong!\n" + e.getMessage());
+        }
+        return new Track[0];
     }
 
-    @GetMapping("/playlists")
-    public ResponseEntity<String> getPlaylists(
-            @RegisteredOAuth2AuthorizedClient("spotify") OAuth2AuthorizedClient authorizedClient) {
+//
+//    @GetMapping(value = "user-playlists")
+//    public Track[] getUserPlaylists() {
+//
+//        final GetListOfUsersPlaylistsRequestRequest getListOfUsersPlaylistsRequestRequest = spotifyApi.getListOfUsersPlaylists();
+//
+//        try {
+//
+//            final Paging<Track> trackPaging = getListOfUsersPlaylistsRequestRequest.execute();
+//
+//            // return Playlists as JSON
+//            return playlistPaging.getItems();
+//        } catch (Exception e) {
+//            System.out.println("Something went wrong!\n" + e.getMessage());
+//        }
+//        return new Playlist[0];
+//    }
 
-        String token = authorizedClient.getAccessToken().getTokenValue();
-        String response = webClient.get()
-                .uri("/me/playlists")
-                .header("Authorization", "Bearer " + token)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
 
-        return ResponseEntity.ok(response);
+    public static void getAudioAnalysisForTrack(String id) {
+
+        final GetAudioAnalysisForTrackRequest getAudioAnalysisForTrackRequest = spotifyApi
+                .getAudioAnalysisForTrack(id)
+                .build();
+        try {
+            final AudioAnalysis audioAnalysis = getAudioAnalysisForTrackRequest.execute();
+
+            System.out.println("Track duration: " + audioAnalysis.getTrack().getDuration());
+        } catch (IOException | SpotifyWebApiException | org.apache.hc.core5.http.ParseException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 
-    @PostMapping("/like")
-    public ResponseEntity<String> saveTrack(
-            @RegisteredOAuth2AuthorizedClient("spotify") OAuth2AuthorizedClient authorizedClient,
-            @RequestParam String trackId) {
+    public static void getCurrentUsersProfile_Sync() {
+        final GetCurrentUsersProfileRequest getCurrentUsersProfileRequest = spotifyApi.getCurrentUsersProfile()
+                .build();
+        try {
+            final User user = getCurrentUsersProfileRequest.execute();
 
-        String token = authorizedClient.getAccessToken().getTokenValue();
-        String response = webClient.put()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/me/tracks")
-                        .queryParam("ids", trackId)
-                        .build())
-                .header("Authorization", "Bearer " + token)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
-
-        return ResponseEntity.ok("Track saved: " + trackId);
+            System.out.println("Display name: " + user.getDisplayName());
+        } catch (IOException | SpotifyWebApiException | ParseException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 }

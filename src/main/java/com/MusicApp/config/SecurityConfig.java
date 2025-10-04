@@ -1,6 +1,5 @@
 package com.MusicApp.config;
 
-import com.MusicApp.controller.OAuth2LoginSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

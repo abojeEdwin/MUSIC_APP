@@ -60,7 +60,7 @@ public class AuthController {
             System.out.println("Error: " + e.getMessage());
         }
         System.out.println(spotifyApi.getAccessToken());
-        response.sendRedirect("http://localhost:3000/top-artists");
+        response.sendRedirect("https://musicappfrontend.vercel.app/top-artists");
 //        return spotifyApi.getAccessToken();
     }
 

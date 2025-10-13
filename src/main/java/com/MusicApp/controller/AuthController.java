@@ -22,7 +22,7 @@ public class AuthController {
     @Value("${CLIENT_SECRET}")
     private static String CLIENT_SECRET;
 
-    private static final URI redirectUri = SpotifyHttpManager.makeUri("https://music-app-oab8.onrender.com/api/get-user-code/");
+    private static final URI redirectUri = SpotifyHttpManager.makeUri("https://music-app-oab8.onrender.com/api/get-user-code");
     public String code = "";
 
     public static final SpotifyApi spotifyApi = new SpotifyApi.Builder()
